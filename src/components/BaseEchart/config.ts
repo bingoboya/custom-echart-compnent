@@ -3,6 +3,7 @@ import * as echarts from "echarts/core";
 // 引入用到的图表
 import {
     LineChart,
+    PieChart,
     type LineSeriesOption
     // GaugeChart,
     // type GaugeSeriesOption
@@ -22,7 +23,8 @@ import {
 import { LabelLayout } from "echarts/features";
 // 引入 Canvas 渲染器，必须
 import { CanvasRenderer } from "echarts/renderers";
-
+import { SurfaceChart } from 'echarts-gl/charts';
+import { Grid3DComponent } from 'echarts-gl/components';
 import type { ComposeOption } from "echarts/core";
 
 // 通过 ComposeOption 来组合出一个只有必须组件和图表的 Option 类型
@@ -36,13 +38,16 @@ export type ECOption = ComposeOption<
 
 // 注册必须的组件
 echarts.use([
+    PieChart,
     LineChart,
     TitleComponent,
     TooltipComponent,
     GridComponent,
     CanvasRenderer,
     LabelLayout,
-    LegendComponent
+    LegendComponent,
+    SurfaceChart,
+    Grid3DComponent
 ]);
 
 export default echarts;

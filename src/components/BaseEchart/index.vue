@@ -1,6 +1,9 @@
+<template>
+    <div ref="chartRef" :style="{ width: props.width, height: props.height }" />
+</template>
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, markRaw, Ref } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
+import { useDebounceFn, useResizeObserver } from '@vueuse/core';
 import echarts, { type ECOption } from './config';
 import { type EChartsType } from 'echarts/core';
 
@@ -17,10 +20,30 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     theme: null,
     loading: false,
+    width: '100%',
+    height: '100%',
 });
 
 const chartRef = ref<Ref<HTMLDivElement>>(null);
 const chartInstance = ref<EChartsType>();
+const text = ref('')
+
+
+// 窗口自适应并开启过渡动画
+const resize = () => {
+    if (chartInstance.value) {
+        chartInstance.value.resize({ animation: { duration: 300 } });
+    }
+};
+
+useResizeObserver(chartRef, (entries) => {
+    const entry = entries[0]
+    const { width, height } = entry.contentRect
+    text.value = `width: ${width}, height: ${height}`
+    console.log('text----111', text.value);
+    debouncedResize()
+})
+
 
 const draw = () => {
     if (chartInstance.value) {
@@ -43,6 +66,7 @@ const init = () => {
         // 绑定鼠标事件：
         if (props.onMouseover) {
             chartInstance.value.on('mouseover', (event: Object) => {
+                console.log('mouseover', event);
                 props.onMouseover(event, chartInstance.value, props.option);
             });
         }
@@ -56,12 +80,7 @@ const init = () => {
     }
 };
 
-// 窗口自适应并开启过渡动画
-const resize = () => {
-    if (chartInstance.value) {
-        chartInstance.value.resize({ animation: { duration: 300 } });
-    }
-};
+
 
 // 自适应防抖优化
 const debouncedResize = useDebounceFn(resize, 500, { maxWait: 800 });
@@ -74,6 +93,7 @@ defineExpose({
 });
 
 watch(props, () => {
+    console.log(222);
     draw();
 });
 
@@ -98,11 +118,3 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', debouncedResize);
 });
 </script>
-
-<template>
-    <div
-        id="echart"
-        ref="chartRef"
-        :style="{ width: props.width, height: props.height }"
-    />
-</template>
